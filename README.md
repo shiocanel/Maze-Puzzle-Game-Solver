@@ -19,4 +19,23 @@ A Python project to build, solve, and train an AI agent on a food-maze puzzle ga
 1. Create a virtual environment:
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
+
+```
+
+2. Activate the virtual environment
+
+* On Windows
+
+```bash
+.venv\Scripts\activate.bat
+```
+
+* On Linux/macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+3. Install dependencies
+...
