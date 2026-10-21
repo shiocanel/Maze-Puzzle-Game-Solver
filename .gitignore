@@ -219,5 +219,11 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Data
-*.txt
+# OS clutter
+.DS_Store
+.Thumbs.db
+
+# ML artifacts
+.pt
+.pth
+.zip
