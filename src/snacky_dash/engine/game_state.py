@@ -22,3 +22,10 @@ class GameState:
 
     def is_won(self):
         return all(stack.is_stack_complete() for stack in self.stacks)
+
+    def is_position_delivery(self, position):
+        for stack in self.stacks:
+            if stack.is_position_delivery(position):
+                return True
+
+        return False

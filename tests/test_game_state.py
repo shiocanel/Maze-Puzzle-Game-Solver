@@ -46,6 +46,9 @@ def test_stack_lookups(sample_game_state):
     assert sample_game_state.get_stack_at((2, 2)) is not None
     assert sample_game_state.get_stack_at((5, 5)) is None
 
+    assert sample_game_state.is_position_delivery((4, 2)) == True
+    assert sample_game_state.is_position_delivery((2, 2)) == False
+
 
 def test_is_won_states():
     snake = Snake(((5, 6),), ())
