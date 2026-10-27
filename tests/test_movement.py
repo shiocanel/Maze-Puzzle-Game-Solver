@@ -6,7 +6,13 @@ from snacky_dash.engine.cart_stack import CartStack
 from snacky_dash.engine.color import Color
 from snacky_dash.engine.direction import Direction
 from snacky_dash.engine.grid import Grid
-from snacky_dash.engine.movement import is_position_blocked, one_step, has_open_side
+from snacky_dash.engine.movement import (
+    is_position_blocked,
+    one_step,
+    has_open_side,
+    open_directions,
+    slide,
+)
 
 @pytest.fixture
 def sample_movement_setup():
@@ -168,3 +174,107 @@ def test_has_open_side_map_c_no_carts():
     grid = Grid(grid_lines)
     game_state = GameState(Snake(((4, 3),), ()), {}, ())
     assert has_open_side(game_state, grid, Direction.LEFT, (4, 3)) is True
+
+
+def test_open_directions_map_b():
+    grid_lines = ["#########", "#.......#", "####.####", "####.####", "#########"]
+    grid = Grid(grid_lines)
+    game_state = GameState(Snake(((1, 4),), ()), {}, ())
+
+    result_b1 = open_directions(game_state, grid, Direction.RIGHT, (1, 4))
+    assert result_b1 == (Direction.RIGHT, Direction.DOWN)
+
+    result_b2 = open_directions(game_state, grid, Direction.RIGHT, (1, 3))
+    assert result_b2 == (Direction.RIGHT,)
+
+    result_b3 = open_directions(game_state, grid, Direction.RIGHT, (1, 7))
+    assert result_b3 == ()
+
+
+def test_open_directions_map_d():
+    grid_lines = ["#######", "#.....#", "#####.#", "#####.#", "#######"]
+    grid = Grid(grid_lines)
+    game_state = GameState(Snake(((1, 5),), ()), {}, ())
+
+    result_d1 = open_directions(game_state, grid, Direction.RIGHT, (1, 5))
+    assert result_d1 == (Direction.DOWN,)
+
+
+def test_slide_map_b_basic():
+    grid = Grid(["#########", "#.......#", "####.####", "####.####", "#########"])
+    state = GameState(Snake(((1, 1),), ()), {}, ())
+    final_state = slide(state, grid, Direction.RIGHT)
+    assert final_state is not None
+    assert final_state.snake.get_head_position() == (1, 4)
+
+
+def test_slide_map_b_second():
+    grid = Grid(["#########", "#.......#", "####.####", "####.####", "#########"])
+    state = GameState(Snake(((1, 4),), ()), {}, ())
+    final_state = slide(state, grid, Direction.RIGHT)
+    assert final_state is not None
+    assert final_state.snake.get_head_position() == (1, 7)
+
+
+def test_slide_map_b_blocked_first():
+    grid = Grid(["#########", "#.......#", "####.####", "####.####", "#########"])
+    state = GameState(Snake(((1, 2),), ()), {}, ())
+    final_state = slide(state, grid, Direction.DOWN)
+    assert final_state is None
+
+
+def test_slide_map_d_turning():
+    grid = Grid(["#######", "#.....#", "#####.#", "#####.#", "#######"])
+    state = GameState(Snake(((1, 1),), ()), {}, ())
+    final_state = slide(state, grid, Direction.RIGHT)
+    assert final_state is not None
+    assert final_state.snake.get_head_position() == (3, 5)
+
+
+def test_slide_map_c_delivery():
+    grid = Grid(
+        ["#########", "#...#####", "#...#####", "#...#####", "#.......#", "#########"]
+    )
+    cart = Cart(
+        color=Color.RED,
+        top_left_position=(1, 1),
+        delivery_position=(4, 2),
+        loaded_count=0,
+    )
+    state = GameState(Snake(((4, 7),), ()), {}, (CartStack((cart,)),))
+    final_state = slide(state, grid, Direction.LEFT)
+    assert final_state is not None
+    assert final_state.snake.get_head_position() == (4, 2)
+    assert final_state.is_position_delivery((4, 2)) is True
+
+
+def test_slide_map_t():
+    grid = Grid(["#####", "##.##", "#...#", "#####"])
+    state = GameState(Snake(((1, 2),), ()), {}, ())
+    final_state = slide(state, grid, Direction.DOWN)
+    assert final_state is not None
+    assert final_state.snake.get_head_position() == (2, 2)
+
+
+def test_slide_head_hit_body():
+    grid = Grid(["#########", "#.......#", "####.####", "####.####", "#########"])
+    snake = Snake(((1, 5), (1, 6), (1, 7)), (Color.RED, Color.BLUE))
+    state = GameState(snake, {}, ())
+    final_state = slide(state, grid, Direction.RIGHT)
+    assert final_state is not None
+    assert final_state.snake.head_hit_body() is True
+
+
+def test_slide_immutability():
+    grid = Grid(["#########", "#.......#", "####.####", "####.####", "#########"])
+    state = GameState(Snake(((1, 1),), ()), {}, ())
+    original_head = state.snake.get_head_position()
+    _ = slide(state, grid, Direction.RIGHT)
+    assert state.snake.get_head_position() == original_head
+
+
+def test_slide_ring_no_hang():
+    grid = Grid(["#####", "#...#", "#.#.#", "#...#", "#####"])
+    state = GameState(Snake(((1, 1),), ()), {}, ())
+    final_state = slide(state, grid, Direction.RIGHT)
+    assert final_state is not None
