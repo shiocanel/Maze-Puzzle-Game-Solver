@@ -12,6 +12,13 @@ def one_step(game_state, grid, direction):
     if is_position_blocked(game_state, grid, new_head_position):
         return None
 
+    fruit_color = game_state.get_fruit_at(new_head_position)
+    if fruit_color is not None:
+        state_without_fruit = game_state.remove_fruit_at(new_head_position)
+        new_snake = game_state.snake.grow_snake(new_head_position, fruit_color)
+
+        return GameState(new_snake, state_without_fruit.fruits, game_state.stacks)
+
     new_snake = game_state.snake.move_snake(new_head_position)
     return GameState(new_snake, game_state.fruits, game_state.stacks)
 

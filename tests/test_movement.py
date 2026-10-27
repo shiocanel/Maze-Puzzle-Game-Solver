@@ -278,3 +278,87 @@ def test_slide_ring_no_hang():
     state = GameState(Snake(((1, 1),), ()), {}, ())
     final_state = slide(state, grid, Direction.RIGHT)
     assert final_state is not None
+
+
+def test_one_step_eating_fruit():
+    grid_lines = [
+        "#########",
+        "#CCC....#",
+        "#CCC....#",
+        "#CCC..B.#",
+        "#.D.....#",
+        "#...R.H.#",
+        "#########",
+    ]
+    grid = Grid(grid_lines)
+    snake = Snake(((5, 5),), ())
+    fruits = {
+        (5, 4): Color.RED,
+        (3, 6): Color.BLUE,
+    }
+    game_state = GameState(snake, fruits, ())
+
+    new_state = one_step(game_state, grid, Direction.LEFT)
+    assert new_state is not None
+    assert new_state.snake.snake_positions == ((5, 4), (5, 5))
+    assert new_state.snake.colors == (Color.RED,)
+    assert new_state.get_fruit_at((5, 4)) is None
+    assert new_state.get_fruit_at((3, 6)) == Color.BLUE
+
+    assert game_state.snake.get_length() == 1
+    assert game_state.get_fruit_at((5, 4)) == Color.RED
+
+
+def test_one_step_eating_with_multi_segment_snake():
+    grid_lines = [
+        "#########",
+        "#CCC....#",
+        "#CCC....#",
+        "#CCC..B.#",
+        "#.D.....#",
+        "#...R.H.#",
+        "#########",
+    ]
+    grid = Grid(grid_lines)
+    snake = Snake(((5, 5), (5, 6)), (Color.BLUE,))
+    fruits = {(5, 4): Color.RED}
+    game_state = GameState(snake, fruits, ())
+
+    new_state = one_step(game_state, grid, Direction.LEFT)
+    assert new_state is not None
+    assert new_state.snake.snake_positions == ((5, 4), (5, 5), (5, 6))
+    assert new_state.snake.colors == (Color.BLUE, Color.RED)
+
+
+def test_one_step_empty_cell_preserves_fruits():
+    grid_lines = [
+        "#########",
+        "#CCC....#",
+        "#CCC....#",
+        "#CCC..B.#",
+        "#.D.....#",
+        "#...R.H.#",
+        "#########",
+    ]
+    grid = Grid(grid_lines)
+    snake = Snake(((5, 5),), ())
+    fruits = {(5, 4): Color.RED}
+    game_state = GameState(snake, fruits, ())
+
+    new_state = one_step(game_state, grid, Direction.UP)
+    assert new_state is not None
+    assert new_state.get_fruit_at((5, 4)) == Color.RED
+
+
+def test_slide_eating_fruit():
+    grid = Grid(["#######", "#.....#", "#######"])
+    fruits = {(1, 3): Color.RED}
+    state = GameState(Snake(((1, 1),), ()), fruits, ())
+
+    final_state = slide(state, grid, Direction.RIGHT)
+
+    assert final_state is not None
+    assert final_state.snake.get_head_position() == (1, 5)
+    assert final_state.snake.snake_positions == ((1, 5), (1, 4))
+    assert final_state.snake.colors == (Color.RED,)
+    assert final_state.get_fruit_at((1, 3)) is None
