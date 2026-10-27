@@ -6,8 +6,7 @@ from snacky_dash.engine.cart_stack import CartStack
 from snacky_dash.engine.color import Color
 from snacky_dash.engine.direction import Direction
 from snacky_dash.engine.grid import Grid
-from snacky_dash.engine.movement import is_position_blocked, one_step
-
+from snacky_dash.engine.movement import is_position_blocked, one_step, has_open_side
 
 @pytest.fixture
 def sample_movement_setup():
@@ -15,13 +14,13 @@ def sample_movement_setup():
         "#########",
         "#CCC....#",
         "#CCC....#",
-        "#CCC..B.#",
+        "#CCC....#",
         "#.D.....#",
-        "#...R.H.#",
-        "#########"
+        "#.....H.#",
+        "#########",
     ]
     grid = Grid(grid_lines)
-    
+
     snake = Snake(((5, 6),), ())
     fruits = {
         (5, 4): Color.RED,
@@ -32,11 +31,11 @@ def sample_movement_setup():
         color=Color.RED,
         top_left_position=(1, 1),
         delivery_position=(4, 2),
-        loaded_count=0
+        loaded_count=0,
     )
     stacks = (CartStack((cart,)),)
     game_state = GameState(snake, fruits, stacks)
-    
+
     return game_state, grid
 
 
@@ -71,19 +70,19 @@ def test_one_step_near_cart():
         "#########",
         "#CCC....#",
         "#CCC....#",
-        "#CCC..B.#",
+        "#CCC....#",
         "#.D.....#",
-        "#...R.H.#",
-        "#########"
+        "#.....H.#",
+        "#########",
     ]
     grid = Grid(grid_lines)
-    
+
     snake = Snake(((4, 3),), ())
     cart = Cart(
         color=Color.RED,
         top_left_position=(1, 1),
         delivery_position=(4, 2),
-        loaded_count=0
+        loaded_count=0,
     )
     game_state = GameState(snake, {}, (CartStack((cart,)),))
 
@@ -100,13 +99,14 @@ def test_multi_segment_snake_movement():
         "#########",
         "#CCC....#",
         "#CCC....#",
-        "#CCC..B.#",
+        "#CCC....#",
         "#.D.....#",
-        "#...R.H.#",
-        "#########"
+        "#.....H.#",
+        "#########",
     ]
+
     grid = Grid(grid_lines)
-    
+
     snake = Snake(((5, 6), (5, 7)), (Color.RED,))
     game_state = GameState(snake, {}, ())
 
@@ -123,3 +123,48 @@ def test_movement_immutability(sample_movement_setup):
 
     assert game_state.snake.get_head_position() == original_head
     assert game_state.get_fruit_at((5, 4)) == Color.RED
+
+
+def test_has_open_side_map_b():
+    grid_lines = ["#########", "#.......#", "####.####", "####.####", "#########"]
+    grid = Grid(grid_lines)
+    game_state = GameState(Snake(((1, 4),), ()), {}, ())
+
+    assert has_open_side(game_state, grid, Direction.RIGHT, (1, 4)) is True
+    assert has_open_side(game_state, grid, Direction.RIGHT, (1, 3)) is False
+
+
+def test_has_open_side_map_c_with_cart():
+    grid_lines = [
+        "#########",
+        "#...#####",
+        "#...#####",
+        "#...#####",
+        "#.......#",
+        "#########",
+    ]
+    grid = Grid(grid_lines)
+
+    cart = Cart(
+        color=Color.RED,
+        top_left_position=(1, 1),
+        delivery_position=(4, 2),
+        loaded_count=0,
+    )
+    game_state = GameState(Snake(((4, 3),), ()), {}, (CartStack((cart,)),))
+
+    assert has_open_side(game_state, grid, Direction.LEFT, (4, 3)) is False
+
+
+def test_has_open_side_map_c_no_carts():
+    grid_lines = [
+        "#########",
+        "#...#####",
+        "#...#####",
+        "#...#####",
+        "#.......#",
+        "#########",
+    ]
+    grid = Grid(grid_lines)
+    game_state = GameState(Snake(((4, 3),), ()), {}, ())
+    assert has_open_side(game_state, grid, Direction.LEFT, (4, 3)) is True

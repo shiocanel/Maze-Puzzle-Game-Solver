@@ -14,3 +14,15 @@ def one_step(game_state, grid, direction):
 
     new_snake = game_state.snake.move_snake(new_head_position)
     return GameState(new_snake, game_state.fruits, game_state.stacks)
+
+
+def has_open_side(game_state, grid, direction, position):
+    sideways = direction.sideways()
+
+    for side in sideways:
+        neighbour_cell = side.move(position)
+
+        if not is_position_blocked(game_state, grid, neighbour_cell):
+            return True
+
+    return False
