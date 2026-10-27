@@ -9,3 +9,9 @@ class Direction(Enum):
 
     def move(self, position):
         return (position[0] + self.value[0], position[1] + self.value[1])
+
+    def sideways(self):
+        if self == Direction.LEFT or self == Direction.RIGHT:
+            return Direction.UP, Direction.DOWN
+
+        return Direction.LEFT, Direction.RIGHT

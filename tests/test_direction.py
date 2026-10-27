@@ -27,3 +27,11 @@ def test_RIGHT():
 def test_off_the_map():
     assert Direction.UP.move((0, 0)) == (-1, 0)
     assert Direction.LEFT.move((0, 0)) == (0, -1)
+
+
+def test_sideways():
+    assert Direction.sideways(Direction.UP) == (Direction.LEFT, Direction.RIGHT)
+    assert Direction.sideways(Direction.DOWN) == (Direction.LEFT, Direction.RIGHT)
+
+    assert Direction.sideways(Direction.LEFT) == (Direction.UP, Direction.DOWN)
+    assert Direction.sideways(Direction.RIGHT) == (Direction.UP, Direction.DOWN)
