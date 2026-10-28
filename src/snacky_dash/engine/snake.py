@@ -41,3 +41,16 @@ class Snake:
 
     def count_color(self, color):
         return self.colors.count(color)
+
+    def remove_colors(self, target_color, count):
+        new_colors = ()
+        removed_count = 0
+
+        for color in self.colors:
+            if color == target_color and removed_count < count:
+                removed_count += 1
+            else:
+                new_colors = new_colors + (color,)
+
+        new_positions = self.snake_positions[: len(new_colors) + 1]
+        return Snake(new_positions, new_colors)

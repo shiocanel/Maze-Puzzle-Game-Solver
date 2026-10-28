@@ -114,3 +114,32 @@ def test_grow_snake():
     assert snake.is_position_part_of_snake((2, 3))
     assert snake.is_position_part_of_snake((2, 2))
     assert not snake.is_position_part_of_snake((5, 5))
+
+
+def test_snake_remove_colors_partial():
+    snake = Snake(
+        ((5, 5), (5, 4), (5, 3), (5, 2), (5, 1)),
+        (Color.RED, Color.RED, Color.RED, Color.BLUE),
+    )
+
+    new_snake = snake.remove_colors(Color.RED, 2)
+
+    assert new_snake.colors == (Color.RED, Color.BLUE)
+    assert new_snake.get_length() == 3
+    assert new_snake.snake_positions == ((5, 5), (5, 4), (5, 3))
+
+
+def test_snake_remove_colors_exceeds_available():
+    snake = Snake(
+        ((5, 5), (5, 4), (5, 3), (5, 2), (5, 1)),
+        (Color.RED, Color.RED, Color.RED, Color.BLUE),
+    )
+
+    new_snake = snake.remove_colors(Color.RED, 5)
+
+    assert new_snake.colors == (Color.BLUE,)
+    assert new_snake.get_length() == 2
+    assert new_snake.snake_positions == ((5, 5), (5, 4))
+
+    assert snake.get_length() == 5
+    assert snake.colors == (Color.RED, Color.RED, Color.RED, Color.BLUE)
