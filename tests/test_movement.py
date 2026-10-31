@@ -362,3 +362,26 @@ def test_slide_eating_fruit():
     assert final_state.snake.snake_positions == ((1, 5), (1, 4))
     assert final_state.snake.colors == (Color.RED,)
     assert final_state.get_fruit_at((1, 3)) is None
+
+
+def test_slide_eating_and_delivery():
+    grid = Grid(
+        ["#########", "#...#####", "#...#####", "#...#####", "#.......#", "#########"]
+    )
+    cart = Cart(
+        color=Color.RED,
+        top_left_position=(1, 1),
+        delivery_position=(4, 2),
+        loaded_count=0,
+    )
+    fruits = {(4, 5): Color.RED}
+    state = GameState(Snake(((4, 7),), ()), fruits, (CartStack((cart,)),))
+
+    final_state = slide(state, grid, Direction.LEFT)
+
+    assert final_state is not None
+    assert final_state.snake.get_head_position() == (4, 2)
+    assert final_state.snake.get_length() == 1
+    assert final_state.snake.colors == ()
+    assert final_state.stacks[0].total_loaded() == 1
+    assert final_state.get_fruit_at((4, 5)) is None

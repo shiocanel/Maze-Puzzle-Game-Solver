@@ -1,4 +1,5 @@
 from snacky_dash.engine.game_state import GameState
+from snacky_dash.engine.unload_snake import unload_snake_to_stack
 
 
 def is_position_blocked(game_state, grid, position):
@@ -16,11 +17,24 @@ def one_step(game_state, grid, direction):
     if fruit_color is not None:
         state_without_fruit = game_state.remove_fruit_at(new_head_position)
         new_snake = game_state.snake.grow_snake(new_head_position, fruit_color)
+        new_state = GameState(new_snake, state_without_fruit.fruits, game_state.stacks)
+    else:
+        new_snake = game_state.snake.move_snake(new_head_position)
+        new_state = GameState(new_snake, game_state.fruits, game_state.stacks)
 
-        return GameState(new_snake, state_without_fruit.fruits, game_state.stacks)
+    if new_state.snake.head_hit_body():
+        return new_state
 
-    new_snake = game_state.snake.move_snake(new_head_position)
-    return GameState(new_snake, game_state.fruits, game_state.stacks)
+    new_head = new_state.snake.get_head_position()
+    stack_index = new_state.get_stack_index_by_delivery(new_head)
+    if stack_index is None:
+        return new_state
+
+    stack = new_state.stacks[stack_index]
+    unloaded_snake, new_stack = unload_snake_to_stack(new_state.snake, stack)
+
+    delivered_state = GameState(unloaded_snake, new_state.fruits, new_state.stacks)
+    return delivered_state.replace_stack_at(stack_index, new_stack)
 
 
 def has_open_side(game_state, grid, direction, position):
