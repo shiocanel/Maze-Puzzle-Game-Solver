@@ -1,6 +1,7 @@
 from snacky_dash.engine.snake import Snake
 from snacky_dash.engine.color import Color
 
+
 def test_snake():
     snake = Snake(((2, 4), (2, 3), (2, 2)), (Color.RED, Color.BLUE))
 

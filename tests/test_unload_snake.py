@@ -1,8 +1,8 @@
-from snacky_dash.engine.unload_snake import unload_snake_to_stack
-from snacky_dash.engine.snake import Snake
 from snacky_dash.engine.cart import Cart
 from snacky_dash.engine.cart_stack import CartStack
 from snacky_dash.engine.color import Color
+from snacky_dash.engine.snake import Snake
+from snacky_dash.engine.unload_snake import unload_snake_to_stack
 
 
 def test_delivery_worked_example():
