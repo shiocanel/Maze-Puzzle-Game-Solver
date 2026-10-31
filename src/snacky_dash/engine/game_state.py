@@ -29,3 +29,15 @@ class GameState:
                 return True
 
         return False
+
+    def get_stack_index_by_delivery(self, position):
+        for i, stack in enumerate(self.stacks):
+            if stack.is_position_delivery(position):
+                return i
+
+        return None
+
+    def replace_stack_at(self, index, new_stack):
+        new_stacks = self.stacks[:index] + (new_stack, ) + self.stacks[index + 1:]
+
+        return GameState(self.snake, self.fruits, new_stacks)

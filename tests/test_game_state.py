@@ -1,9 +1,10 @@
 import pytest
-from snacky_dash.engine.game_state import GameState
-from snacky_dash.engine.snake import Snake
+
 from snacky_dash.engine.cart import Cart
 from snacky_dash.engine.cart_stack import CartStack
 from snacky_dash.engine.color import Color
+from snacky_dash.engine.game_state import GameState
+from snacky_dash.engine.snake import Snake
 
 
 @pytest.fixture
@@ -60,3 +61,22 @@ def test_is_won_states():
     cart_filled = Cart(Color.RED, (1, 1), (4, 2), loaded_count=9)
     state_filled = GameState(snake, {}, (CartStack((cart_filled,)),))
     assert state_filled.is_won() is True
+
+def test_get_stack_index_by_delivery(sample_game_state):
+    assert sample_game_state.get_stack_index_by_delivery((4, 2)) == 0
+    assert sample_game_state.get_stack_index_by_delivery((4, 3)) is None
+
+
+def test_replace_stack_at_and_win(sample_game_state):
+    filled_cart = Cart(
+        color=Color.RED,
+        top_left_position=(1, 1),
+        delivery_position=(4, 2),
+        loaded_count=9,
+    )
+    new_stack = CartStack((filled_cart,))
+
+    new_state = sample_game_state.replace_stack_at(0, new_stack)
+
+    assert new_state.is_won() is True
+    assert sample_game_state.is_won() is False
