@@ -33,7 +33,7 @@ def render_board(grid, game_state):
 
 
 def main():
-    level_path = "levels/level_02.json"
+    level_path = "levels/level_01.json"
     try:
         grid, state = load_level_from_file(level_path)
     except FileNotFoundError:
