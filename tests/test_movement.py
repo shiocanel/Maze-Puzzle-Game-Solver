@@ -385,3 +385,76 @@ def test_slide_eating_and_delivery():
     assert final_state.snake.colors == ()
     assert final_state.stacks[0].total_loaded() == 1
     assert final_state.get_fruit_at((4, 5)) is None
+
+
+def test_cart_stack_delivery_when_full():
+    cart = Cart(
+        color=Color.RED,
+        top_left_position=(1, 1),
+        delivery_position=(4, 2),
+        loaded_count=9,
+    )
+    stack = CartStack((cart,))
+    # A stack whose cart holds 9 is complete, so is_position_delivery must return False (boolean)
+    assert stack.is_position_delivery((4, 2)) is False
+
+
+def test_slide_stops_on_delivery_incomplete_stack():
+    grid = Grid(
+        ["#########", "#...#####", "#...#####", "#...#####", "#.......#", "#########"]
+    )
+    cart = Cart(
+        color=Color.RED,
+        top_left_position=(1, 1),
+        delivery_position=(4, 2),
+        loaded_count=8,
+    )
+    fruits = {(4, 5): Color.RED}
+    state = GameState(Snake(((4, 7),), ()), fruits, (CartStack((cart,)),))
+
+    final_state = slide(state, grid, Direction.LEFT)
+
+    assert final_state is not None
+    assert final_state.snake.get_head_position() == (4, 2)
+    assert final_state.snake.get_length() == 1
+    assert final_state.stacks[0].total_loaded() == 9
+    assert final_state.is_won() is True
+
+
+def test_slide_passes_over_delivery_complete_stack():
+    grid = Grid(
+        ["#########", "#...#####", "#...#####", "#...#####", "#.......#", "#########"]
+    )
+    cart = Cart(
+        color=Color.RED,
+        top_left_position=(1, 1),
+        delivery_position=(4, 2),
+        loaded_count=9,
+    )
+    state = GameState(Snake(((4, 7),), ()), {}, (CartStack((cart,)),))
+
+    final_state = slide(state, grid, Direction.LEFT)
+
+    assert final_state is not None
+    assert final_state.snake.get_head_position() == (4, 1)
+
+
+def test_slide_starts_adjacent_to_delivery_completes_stack():
+    grid = Grid(
+        ["#########", "#...#####", "#...#####", "#...#####", "#.......#", "#########"]
+    )
+    cart = Cart(
+        color=Color.RED,
+        top_left_position=(1, 1),
+        delivery_position=(4, 2),
+        loaded_count=8,
+    )
+    snake = Snake(((4, 3), (4, 4)), (Color.RED,))
+    state = GameState(snake, {}, (CartStack((cart,)),))
+
+    final_state = slide(state, grid, Direction.LEFT)
+
+    assert final_state is not None
+    assert final_state.snake.get_head_position() == (4, 2)
+    assert final_state.stacks[0].total_loaded() == 9
+    assert final_state.is_won() is True

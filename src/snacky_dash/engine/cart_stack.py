@@ -20,7 +20,10 @@ class CartStack:
         return self.carts[0].is_position_part_of_cart(position)
 
     def is_position_delivery(self, position):
-        return self.carts[0].is_position_delivery(position)
+        if not self.is_stack_complete():
+            return bool(self.carts[0].is_position_delivery(position))
+
+        return False
 
     def load(self, count):
         if self.is_stack_complete():
