@@ -1,5 +1,5 @@
 import pygame
-from pygame.locals import K_ESCAPE, KEYDOWN
+from pygame.locals import K_ESCAPE, KEYDOWN, QUIT
 from snacky_dash.engine.level_loader import load_level_from_file
 from pathlib import Path
 
@@ -8,7 +8,9 @@ WALL_COLOR = (153, 255, 51)
 FLOOR_COLOR = (64, 64, 64)
 
 CART_COLOR = (255, 179, 179)
+FULL_CART_COLOR = (255, 119, 0)
 DELIVERY_COLOR = (255, 128, 0)
+INACTIVE_DELIVERY_COLOR = (120, 120, 120)
 
 RED_COLOR = (255, 0, 0)
 YELLOW_COLOR = (255, 255, 0)
@@ -28,8 +30,99 @@ def draw_grid(screen, grid):
                 pygame.draw.rect(screen, FLOOR_COLOR, rect)
 
 
-def draw_state(scree, state):
-    pass
+def draw_centered_rounded_square(screen, color, position, size=30, border_radius=6):
+    r, c = position
+
+    x = c * CELL_SIZE + (CELL_SIZE - size) // 2
+    y = r * CELL_SIZE + (CELL_SIZE - size) // 2
+
+    rect = pygame.Rect(x, y, size, size)
+    pygame.draw.rect(screen, color, rect, border_radius=border_radius)
+
+
+def draw_delivery_cell(screen, deliv_pos, active=True):
+    r, c = deliv_pos
+    x = c * CELL_SIZE
+    y = r * CELL_SIZE
+    color = DELIVERY_COLOR if active else INACTIVE_DELIVERY_COLOR
+
+    pygame.draw.polygon(
+        screen,
+        color,
+        (
+            (x, y),
+            (x + 10, y),
+            (x, y + 10),
+        ),
+    )
+
+    pygame.draw.polygon(
+        screen,
+        color,
+        (
+            (x + CELL_SIZE, y),
+            (x + CELL_SIZE - 10, y),
+            (x + CELL_SIZE, y + 10),
+        ),
+    )
+
+    pygame.draw.polygon(
+        screen,
+        color,
+        (
+            (x, y + CELL_SIZE - 1),
+            (x + 10, y + CELL_SIZE - 1),
+            (x, y + CELL_SIZE - 11),
+        ),
+    )
+
+    pygame.draw.polygon(
+        screen,
+        color,
+        (
+            (x + CELL_SIZE - 1, y + CELL_SIZE),
+            (x + CELL_SIZE - 11, y + CELL_SIZE - 1),
+            (x + CELL_SIZE - 1, y + CELL_SIZE - 10),
+        ),
+    )
+    draw_centered_rounded_square(
+        screen,
+        ORANGE_COLOR if active else INACTIVE_DELIVERY_COLOR,
+        deliv_pos,
+        size=20,
+        border_radius=6,
+    )
+
+
+def draw_state(screen, state):
+    for cart_stack in state.stacks:
+        if cart_stack.is_stack_complete():
+            for pos in cart_stack.carts[0].cart_positions:
+                rect = pygame.Rect(
+                    (pos[1]) * CELL_SIZE,
+                    (pos[0]) * CELL_SIZE,
+                    CELL_SIZE,
+                    CELL_SIZE,
+                )
+                pygame.draw.rect(screen, FULL_CART_COLOR, rect)
+            draw_delivery_cell(
+                screen, cart_stack.carts[0].delivery_position, active=False
+            )
+            continue
+
+        active_cart = cart_stack.get_active_cart()
+
+        for pos in active_cart.cart_positions:
+            rect = pygame.Rect(
+                (pos[1]) * CELL_SIZE,
+                (pos[0]) * CELL_SIZE,
+                CELL_SIZE,
+                CELL_SIZE,
+            )
+
+            pygame.draw.rect(screen, CART_COLOR, rect)
+
+        draw_delivery_cell(screen, active_cart.delivery_position, active=True)
 
 
 def main():
@@ -54,15 +147,19 @@ def main():
         clock.tick(60)
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == QUIT:
                 running = False
             elif event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     running = False
 
+        screen.fill(WALL_COLOR)
         draw_grid(screen, grid)
+        draw_state(screen, state)
 
         pygame.display.flip()
+
+    pygame.quit()
 
 
 if __name__ == "__main__":
