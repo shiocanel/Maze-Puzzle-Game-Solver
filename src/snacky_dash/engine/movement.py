@@ -73,6 +73,7 @@ def slide(game_state, grid, direction):
 
     current_direction = direction
     seen = set()
+    previous_state = game_state
 
     while True:
         head_position = current_state.snake.get_head_position()
@@ -80,7 +81,7 @@ def slide(game_state, grid, direction):
         if current_state.snake.head_hit_body():
             return current_state
 
-        if current_state.is_position_delivery(head_position):
+        if previous_state.is_position_delivery(head_position):
             return current_state
 
         opens = open_directions(current_state, grid, current_direction, head_position)
@@ -96,4 +97,6 @@ def slide(game_state, grid, direction):
         next_state = one_step(current_state, grid, current_direction)
         if next_state is None:
             return current_state
+
+        previous_state = current_state
         current_state = next_state
