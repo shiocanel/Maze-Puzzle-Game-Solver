@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class Color(Enum):
     RED = "R"
     YELLOW = "Y"

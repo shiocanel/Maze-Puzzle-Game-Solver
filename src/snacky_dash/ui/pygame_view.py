@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import K_ESCAPE, KEYDOWN, QUIT
 from snacky_dash.engine.level_loader import load_level_from_file
+from snacky_dash.engine.color import Color
 from pathlib import Path
 
 CELL_SIZE = 48
@@ -18,6 +19,19 @@ BLUE_COLOR = (102, 102, 255)
 GREEN_COLOR = (0, 204, 0)
 ORANGE_COLOR = (255, 128, 0)
 PURPLE_COLOR = (153, 0, 153)
+
+STEM_COLOR = (120, 70, 40)
+LEAF_COLOR = (46, 204, 113)
+HIGHLIGHT_COLOR = (255, 255, 255)
+
+COLOR_TO_RGB = {
+    Color.RED: RED_COLOR,
+    Color.YELLOW: YELLOW_COLOR,
+    Color.BLUE: BLUE_COLOR,
+    Color.GREEN: GREEN_COLOR,
+    Color.ORANGE: ORANGE_COLOR,
+    Color.PURPLE: PURPLE_COLOR,
+}
 
 
 def draw_grid(screen, grid):
@@ -122,7 +136,46 @@ def draw_state(screen, state):
 
             pygame.draw.rect(screen, CART_COLOR, rect)
 
+        cart_color_rgb = COLOR_TO_RGB.get(active_cart.color, RED_COLOR)
+        draw_cart_border(screen, active_cart, cart_color_rgb, border_width=4)
         draw_delivery_cell(screen, active_cart.delivery_position, active=True)
+
+
+def draw_cart_border(screen, active_cart, color_rgb, border_width=4):
+    r, c = active_cart.top_left_position
+    rect = pygame.Rect(
+        c * CELL_SIZE,
+        r * CELL_SIZE,
+        CELL_SIZE * 3,
+        CELL_SIZE * 3,
+    )
+    pygame.draw.rect(screen, color_rgb, rect, width=border_width)
+
+
+def draw_fruits(screen, state):
+    for pos, fruit_color in state.fruits.items():
+        center_x = pos[1] * CELL_SIZE + CELL_SIZE // 2
+        center_y = pos[0] * CELL_SIZE + CELL_SIZE // 2
+
+        radius = CELL_SIZE // 3
+        color_rgb = COLOR_TO_RGB.get(fruit_color, (255, 255, 255))
+
+        pygame.draw.circle(screen, color_rgb, (center_x, center_y), radius)
+
+        highlight_radius = max(2, radius // 4)
+        pygame.draw.circle(
+            screen,
+            HIGHLIGHT_COLOR,
+            (center_x - radius // 3, center_y - radius // 3),
+            highlight_radius,
+        )
+
+        stem_start = (center_x, center_y - radius)
+        stem_end = (center_x + 2, center_y - radius - 6)
+        pygame.draw.line(screen, STEM_COLOR, stem_start, stem_end, width=3)
+
+        leaf_center = (center_x + 6, center_y - radius - 4)
+        pygame.draw.circle(screen, LEAF_COLOR, leaf_center, 4)
 
 
 def main():
@@ -153,9 +206,9 @@ def main():
                 if event.key == K_ESCAPE:
                     running = False
 
-        screen.fill(WALL_COLOR)
         draw_grid(screen, grid)
         draw_state(screen, state)
+        draw_fruits(screen, state)
 
         pygame.display.flip()
 
