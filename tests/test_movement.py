@@ -255,14 +255,32 @@ def test_slide_map_t():
     assert final_state is not None
     assert final_state.snake.get_head_position() == (2, 2)
 
-
 def test_slide_head_hit_body():
-    grid = Grid(["#########", "#.......#", "####.####", "####.####", "#########"])
-    snake = Snake(((1, 5), (1, 6), (1, 7)), (Color.RED, Color.BLUE))
+    grid = Grid(["#######", "#.....#", "#.....#", "#.....#", "#.....#", "#######"])
+    snake = Snake(
+        ((2, 2), (3, 2), (3, 3), (2, 3), (1, 3)),
+        (Color.RED, Color.BLUE, Color.RED, Color.BLUE),
+    )
     state = GameState(snake, {}, ())
+
     final_state = slide(state, grid, Direction.RIGHT)
+
     assert final_state is not None
     assert final_state.snake.head_hit_body() is True
+
+
+def test_slide_neck_collision():
+    grid = Grid(["#######", "#.....#", "#.....#", "#.....#", "#.....#", "#######"])
+
+    snake = Snake(((2, 2), (2, 3)), (Color.RED,))
+    state = GameState(snake, {}, ())
+
+    result_right = slide(state, grid, Direction.RIGHT)
+    assert result_right is None
+
+    result_left = slide(state, grid, Direction.LEFT)
+    assert result_left is not None
+    assert result_left.snake.get_head_position() == (2, 1)
 
 
 def test_slide_immutability():

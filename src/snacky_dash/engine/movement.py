@@ -67,6 +67,15 @@ def open_directions(game_state, grid, direction, position):
 
 
 def slide(game_state, grid, direction):
+    snake = game_state.snake
+    if snake.get_length() > 1:
+        head = snake.snake_positions[0]
+        neck = snake.snake_positions[1]
+
+        next_pos = direction.move(head)
+        if next_pos == neck:
+            return None
+
     current_state = one_step(game_state, grid, direction)
     if current_state is None:
         return None
