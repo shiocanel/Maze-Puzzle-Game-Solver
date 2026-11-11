@@ -14,14 +14,17 @@ CART_COLOR = (255, 179, 179)
 FULL_CART_COLOR = (255, 119, 0)
 DELIVERY_COLOR = (255, 128, 0)
 INACTIVE_DELIVERY_COLOR = (120, 120, 120)
-SNAKE_HEAD_COLOR = (232, 0, 224)
 
-RED_COLOR = (255, 0, 0)
-YELLOW_COLOR = (255, 255, 0)
-BLUE_COLOR = (102, 102, 255)
-GREEN_COLOR = (0, 204, 0)
-ORANGE_COLOR = (255, 128, 0)
-PURPLE_COLOR = (153, 0, 153)
+SNAKE_HEAD_COLOR = (255, 105, 180)
+SNAKE_EYE_COLOR = (20, 20, 20)
+SNAKE_EYE_SHINE = (255, 255, 255)
+
+RED_COLOR = (255, 70, 70)
+YELLOW_COLOR = (255, 220, 50)
+BLUE_COLOR = (80, 140, 255)
+GREEN_COLOR = (50, 210, 90)
+ORANGE_COLOR = (255, 140, 0)
+PURPLE_COLOR = (180, 80, 220)
 
 STEM_COLOR = (120, 70, 40)
 LEAF_COLOR = (46, 204, 113)
@@ -45,7 +48,7 @@ KEY_TO_DIRECTION = {
 
 
 def load_level():
-    level_path = Path("levels/level_02.json")
+    level_path = Path("levels/level_03.json")
     try:
         return load_level_from_file(level_path)
     except FileNotFoundError:
@@ -157,14 +160,52 @@ def draw_fruits(screen, state):
 
 def draw_snake(screen, state):
     snake = state.snake
-    head_pos = snake.get_head_position()
-    draw_centered_rounded_square(
-        screen, SNAKE_HEAD_COLOR, head_pos, size=38, border_radius=15
-    )
+    positions = snake.snake_positions
+    colors = snake.colors
 
-    for pos, color in zip(snake.snake_positions[1:], snake.colors):
-        col = COLOR_TO_RGB.get(color, (255, 255, 255))
-        draw_centered_rounded_square(screen, col, pos, size=30, border_radius=12)
+    if not positions:
+        return
+
+    for i in range(len(positions) - 1):
+        curr_pos = positions[i]
+        next_pos = positions[i + 1]
+
+        x1 = curr_pos[1] * CELL_SIZE + CELL_SIZE // 2
+        y1 = curr_pos[0] * CELL_SIZE + CELL_SIZE // 2
+        x2 = next_pos[1] * CELL_SIZE + CELL_SIZE // 2
+        y2 = next_pos[0] * CELL_SIZE + CELL_SIZE // 2
+
+        pygame.draw.line(screen, SNAKE_HEAD_COLOR, (x1, y1), (x2, y2), width=34)
+
+    for pos in positions:
+        draw_centered_rounded_square(
+            screen, SNAKE_HEAD_COLOR, pos, size=34, border_radius=14
+        )
+
+    for i, color in enumerate(colors):
+        seg_pos = positions[i + 1]
+        col_rgb = COLOR_TO_RGB.get(color, (255, 255, 255))
+
+        draw_centered_rounded_square(screen, col_rgb, seg_pos, size=22, border_radius=8)
+
+        gx = seg_pos[1] * CELL_SIZE + CELL_SIZE // 2 - 4
+        gy = seg_pos[0] * CELL_SIZE + CELL_SIZE // 2 - 6
+        pygame.draw.circle(screen, HIGHLIGHT_COLOR, (gx, gy), 3)
+
+    head_pos = positions[0]
+    draw_centered_rounded_square(
+        screen, SNAKE_HEAD_COLOR, head_pos, size=40, border_radius=16
+    )
+    hx = head_pos[1] * CELL_SIZE + CELL_SIZE // 2 - 8
+    hy = head_pos[0] * CELL_SIZE + CELL_SIZE // 2 - 12
+    pygame.draw.circle(screen, HIGHLIGHT_COLOR, (hx, hy), 4)
+
+    eye_y = head_pos[0] * CELL_SIZE + CELL_SIZE // 2 - 4
+    left_eye_x = head_pos[1] * CELL_SIZE + CELL_SIZE // 2 - 8
+    right_eye_x = head_pos[1] * CELL_SIZE + CELL_SIZE // 2 + 8
+    for ex in (left_eye_x, right_eye_x):
+        pygame.draw.circle(screen, SNAKE_EYE_COLOR, (ex, eye_y), 4)
+        pygame.draw.circle(screen, SNAKE_EYE_SHINE, (ex + 1, eye_y - 1), 1)
 
 
 def main():
