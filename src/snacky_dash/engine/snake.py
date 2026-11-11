@@ -1,5 +1,4 @@
 class Snake:
-
     def __init__(self, positions, colors):
         self.snake_positions = tuple(positions)
         self.colors = tuple(colors)
