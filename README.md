@@ -41,3 +41,13 @@ source .venv/bin/activate
 ```bash
 pip install -e .
 ```
+
+4. Run the tests:
+```bash
+pytest -v
+```
+
+5. Run the game window:
+```bash
+python3 -m snacky_dash.ui.pygame_view
+```

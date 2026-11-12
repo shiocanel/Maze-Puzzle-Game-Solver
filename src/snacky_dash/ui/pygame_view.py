@@ -48,7 +48,7 @@ KEY_TO_DIRECTION = {
 
 
 def load_level():
-    level_path = Path("levels/level_03.json")
+    level_path = Path("levels/level_04.json")
     try:
         return load_level_from_file(level_path)
     except FileNotFoundError:
